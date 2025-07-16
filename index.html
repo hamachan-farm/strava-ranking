@@ -2,39 +2,54 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>Strava 距離ランキング</title>
+  <title>Strava ランキング</title>
   <style>
-    body { font-family: sans-serif; padding: 20px; }
-    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
-    th { background-color: #f2f2f2; }
+    body {
+      font-family: sans-serif;
+      background-color: #f5f5f5;
+      padding: 20px;
+      max-width: 600px;
+      margin: auto;
+    }
+    h1 {
+      text-align: center;
+    }
+    .entry {
+      background: white;
+      margin: 10px 0;
+      padding: 10px;
+      border-left: 5px solid #ff6f00;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
   </style>
 </head>
 <body>
-  <h1>🏃‍♂️ Strava 月間距離ランキング 🏃‍♀️</h1>
+  <h1>月間ラン距離ランキング</h1>
   <div id="ranking">読み込み中...</div>
 
   <script>
-    const apiUrl = "https://script.google.com/macros/s/AKfycbwF7kLzNPFMnROm7HufYltiLY2O5F-vntBdg-InWtxeZeiw0PCKmNpnbYHAyGO1EaIv0g/exec"; // 
+    const apiUrl = "https://script.google.com/macros/s/《あなたのGASのWeb URL》/exec"; // ★差し替えて！
 
     fetch(apiUrl)
       .then(response => response.json())
       .then(data => {
-        const div = document.getElementById('ranking');
-        if (!Array.isArray(data)) {
-          div.innerText = "データ形式が不正です";
+        const container = document.getElementById("ranking");
+        container.innerHTML = "";
+
+        if (data.error) {
+          container.textContent = "データが見つかりません。";
           return;
         }
 
-        let html = "<table><tr><th>名前</th><th>距離(km)</th><th>時間(h)</th><th>ラン回数</th></tr>";
-        data.forEach(row => {
-          html += `<tr><td>${row.name}</td><td>${row.km}</td><td>${row.time}</td><td>${row.count}</td></tr>`;
+        data.forEach((entry, index) => {
+          const div = document.createElement("div");
+          div.className = "entry";
+          div.textContent = `${index + 1}. ${entry.name} - ${entry.km} km (${entry.count}回)`;
+          container.appendChild(div);
         });
-        html += "</table>";
-        div.innerHTML = html;
       })
       .catch(error => {
-        document.getElementById('ranking').innerText = "データの取得に失敗しました";
+        document.getElementById("ranking").textContent = "データ取得に失敗しました。";
         console.error(error);
       });
   </script>
