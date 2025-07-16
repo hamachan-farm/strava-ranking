@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Strava ランキング</title>
   <style>
     body {
@@ -28,7 +28,9 @@
   <div id="ranking">読み込み中...</div>
 
   <script>
+    // https://script.google.com/macros/s/AKfycbxdAluex9NK6snLsnjwf4QbDQL3wbVKnVNdIj7WuDvfnM6JWGl0YYVZxFw6EeNY0kXBeA/exec
     const apiUrl = "https://script.google.com/macros/s/AKfycbxogWEPK-Nwi3Z0Qua5NYwu7WPZ5YXusJ3QeBS1FD3XVdhsEHg08uM1X20ajHHy4P_3iw/exec";
+
     fetch(apiUrl)
       .then(response => response.json())
       .then(data => {
