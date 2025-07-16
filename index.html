@@ -1,63 +1,42 @@
-<h<!DOCTYPE html>
-tml lang="ja">
+<!DOCTYPE html>
+<html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Strava 月間ランキング</title>
+  <meta charset="UTF-8">
+  <title>Strava 距離ランキング</title>
   <style>
-    body { font-family: sans-serif; margin: 1em; }
-    table { width: 100%; border-collapse: collapse; }
-    th, td { border: 1px solid #ccc; padding: 0.5em; text-align: left; }
-    th { background: #eee; }
+    body { font-family: sans-serif; padding: 20px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+    th { background-color: #f2f2f2; }
   </style>
 </head>
 <body>
-  <h1>Strava 月間距離ランキング</h1>
-  <select id="monthSelect"></select>
-  <table id="rankingTable">
-    <thead>
-      <tr><th>名前</th><th>距離 (km)</th><th>時間 (h)</th><th>ラン回数</th></tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+  <h1>🏃‍♂️ Strava 月間距離ランキング 🏃‍♀️</h1>
+  <div id="ranking">読み込み中...</div>
 
   <script>
-    const apiUrl = 'https://script.google.com/macros/s/AKfycbzmJebzTTJQq543165ah5BxFDyB9aQ5lKNFfXLHYToopTBrB2Fs525seYeoqCRRVZNN/exec';
+    const apiUrl = "YOUR_WEB_APP_URL_HERE"; // 👈 ここをあなたのGAS Web URLに書き換える
 
-    async function fetchData() {
-      const res = await fetch(apiUrl);
-      const data = await res.json();
+    fetch(apiUrl)
+      .then(response => response.json())
+      .then(data => {
+        const div = document.getElementById('ranking');
+        if (!Array.isArray(data)) {
+          div.innerText = "データ形式が不正です";
+          return;
+        }
 
-      const monthSelect = document.getElementById('monthSelect');
-      const tbody = document.querySelector('#rankingTable tbody');
-
-      Object.keys(data).forEach(month => {
-        const option = document.createElement('option');
-        option.value = month;
-        option.textContent = month;
-        monthSelect.appendChild(option);
+        let html = "<table><tr><th>名前</th><th>距離(km)</th><th>時間(h)</th><th>ラン回数</th></tr>";
+        data.forEach(row => {
+          html += `<tr><td>${row.name}</td><td>${row.km}</td><td>${row.time}</td><td>${row.count}</td></tr>`;
+        });
+        html += "</table>";
+        div.innerHTML = html;
+      })
+      .catch(error => {
+        document.getElementById('ranking').innerText = "データの取得に失敗しました";
+        console.error(error);
       });
-
-      function renderTable(month) {
-        tbody.innerHTML = '';
-        if (!data[month]) return;
-        data[month]
-          .sort((a,b) => b.distance - a.distance)
-          .forEach(entry => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `<td>${entry.name}</td><td>${entry.distance}</td><td>${entry.time}</td><td>${entry.runCount}</td>`;
-            tbody.appendChild(tr);
-          });
-      }
-
-      monthSelect.addEventListener('change', () => renderTable(monthSelect.value));
-
-      // 最初は一番古い月（配列の最初）を表示
-      monthSelect.value = Object.keys(data)[0];
-      renderTable(monthSelect.value);
-    }
-
-    fetchData();
   </script>
 </body>
 </html>
