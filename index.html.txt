@@ -1,0 +1,63 @@
+<h<!DOCTYPE html>
+tml lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Strava 月間ランキング</title>
+  <style>
+    body { font-family: sans-serif; margin: 1em; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid #ccc; padding: 0.5em; text-align: left; }
+    th { background: #eee; }
+  </style>
+</head>
+<body>
+  <h1>Strava 月間距離ランキング</h1>
+  <select id="monthSelect"></select>
+  <table id="rankingTable">
+    <thead>
+      <tr><th>名前</th><th>距離 (km)</th><th>時間 (h)</th><th>ラン回数</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    const apiUrl = 'https://script.google.com/macros/s/AKfycbzmJebzTTJQq543165ah5BxFDyB9aQ5lKNFfXLHYToopTBrB2Fs525seYeoqCRRVZNN/exec';
+
+    async function fetchData() {
+      const res = await fetch(apiUrl);
+      const data = await res.json();
+
+      const monthSelect = document.getElementById('monthSelect');
+      const tbody = document.querySelector('#rankingTable tbody');
+
+      Object.keys(data).forEach(month => {
+        const option = document.createElement('option');
+        option.value = month;
+        option.textContent = month;
+        monthSelect.appendChild(option);
+      });
+
+      function renderTable(month) {
+        tbody.innerHTML = '';
+        if (!data[month]) return;
+        data[month]
+          .sort((a,b) => b.distance - a.distance)
+          .forEach(entry => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td>${entry.name}</td><td>${entry.distance}</td><td>${entry.time}</td><td>${entry.runCount}</td>`;
+            tbody.appendChild(tr);
+          });
+      }
+
+      monthSelect.addEventListener('change', () => renderTable(monthSelect.value));
+
+      // 最初は一番古い月（配列の最初）を表示
+      monthSelect.value = Object.keys(data)[0];
+      renderTable(monthSelect.value);
+    }
+
+    fetchData();
+  </script>
+</body>
+</html>
