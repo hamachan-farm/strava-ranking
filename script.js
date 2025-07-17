@@ -1,4 +1,4 @@
-const GAS_API_URL = "https://script.google.com/macros/s/xxxxx/exec"; // ←実際のURLに変更
+const GAS_API_URL = "https://script.google.com/macros/s/AKfycbxarjliM7v29kN3b7z9XQL4bhdRwujUD__qhgNgAB_eNUxuzPReXnH_25ci7WEEJ_FsHA/exec"; // 
 
 async function fetchRanking() {
   const month = document.getElementById("monthSelector").value;
