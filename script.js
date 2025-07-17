@@ -1,4 +1,4 @@
-const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzlWDNCy1X3k1ZLy2KI_IAWeYkJ-ZhURVOYeusAJVS_gNl1BhgDLI6RARR3YzCsME-_Iw/exec";
+const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzW8MddU8PJQ1sd2tuVrsWbGRbLaw6LLLXI8-64GyfTLltvIy4gyihiRfZRmj2MHtt38A/exec";
 
 async function fetchRanking() {
   const month = document.getElementById("monthSelector").value;
