@@ -11,32 +11,111 @@
   </style>
 </head>
 <body>
-  <h1>🏃‍♂️ Strava 月間距離ランキング 🏃‍♀️</h1>
-  <div id="ranking">読み込み中...</div>
+  <h1 class="text-center"><i class="fas fa-running"></i> Strava 月間距離ランキング <i class="fas fa-running"></i></h1>
+    <div class="row mb-3 justify-content-center">
+      <div class="col-auto">
+        <label for="monthInput" class="form-label visually-hidden">月を選択</label>
+        <input type="month" id="monthInput" class="form-control" value="2025-07">
+      </div>
+      <div class="col-auto">
+        <button id="loadBtn" class="btn btn-primary">読み込み</button>
+      </div>
+    </div>
+    <div id="error" class="alert alert-danger d-none" role="alert"></div>
+    <div id="ranking" class="mt-4 text-center">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="mt-2">読み込み中...</p>
+    </div>
+  </div>
 
+  <!-- Bootstrap JS Bundle with Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    const apiUrl = "https://script.google.com/macros/s/AKfycbwF7kLzNPFMnROm7HufYltiLY2O5F-vntBdg-InWtxeZeiw0PCKmNpnbYHAyGO1EaIv0g/exec"; // 
+    const apiBaseUrl = 'https://script.google.com/macros/s/AKfycbwGwnsYZiMtzUcB1Mk6odPNAgLaZPVr9K4WaHs0EYgqy3emiBimIg1wZPk_Ucobjb3iSg/exec';
 
-    fetch(apiUrl)
-      .then(response => response.json())
-      .then(data => {
-        const div = document.getElementById('ranking');
-        if (!Array.isArray(data)) {
-          div.innerText = "データ形式が不正です";
+    const monthInput = document.getElementById('monthInput');
+    const loadBtn = document.getElementById('loadBtn');
+    const rankingDiv = document.getElementById('ranking');
+    const errorDiv = document.getElementById('error');
+
+    loadBtn.addEventListener('click', () => {
+      const month = monthInput.value;
+      if (!month) {
+        showError('月を選択してください');
+        return;
+      }
+      fetchRanking(month);
+    });
+
+    function showError(msg) {
+      errorDiv.textContent = msg;
+      errorDiv.classList.remove('d-none');
+      rankingDiv.innerHTML = ''; // Clear ranking content
+    }
+
+    function hideError() {
+      errorDiv.classList.add('d-none');
+    }
+
+    async function fetchRanking(month) {
+      hideError();
+      rankingDiv.innerHTML = `
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-2">読み込み中...</p>
+      `; // Show loading spinner
+
+      const url = `${apiBaseUrl}?month=${month}`;
+      try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('通信エラー');
+        const data = await res.json();
+        if (data.error) {
+          showError(data.error);
           return;
         }
+        renderRankingCards(data.ranking);
+      } catch (e) {
+        showError('データ取得失敗: ' + e.message);
+        console.error(e);
+      }
+    }
 
-        let html = "<table><tr><th>名前</th><th>距離(km)</th><th>時間(h)</th><th>ラン回数</th></tr>";
-        data.forEach(row => {
-          html += `<tr><td>${row.name}</td><td>${row.km}</td><td>${row.time}</td><td>${row.count}</td></tr>`;
-        });
-        html += "</table>";
-        div.innerHTML = html;
-      })
-      .catch(error => {
-        document.getElementById('ranking').innerText = "データの取得に失敗しました";
-        console.error(error);
+    function renderRankingCards(ranking) {
+      rankingDiv.innerHTML = ''; // Clear loading spinner
+
+      if (!Array.isArray(ranking) || ranking.length === 0) {
+        rankingDiv.innerHTML = '<p class="text-muted">データがありません。</p>';
+        return;
+      }
+
+      let html = '<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">';
+      ranking.forEach(row => {
+        html += `
+          <div class="col">
+            <div class="card h-100 shadow-sm">
+              <div class="card-body">
+                <h5 class="card-title text-primary">${row.user}</h5>
+                <p class="card-text mb-1"><strong>距離:</strong> ${row.distance_km} km</p>
+                <p class="card-text mb-1"><strong>時間:</strong> ${row.time_min} min</p>
+                <p class="card-text"><strong>ラン回数:</strong> ${row.count}</p>
+              </div>
+            </div>
+          </div>
+        `;
       });
+      html += '</div>';
+      rankingDiv.innerHTML = html;
+    }
+
+    // Initial load with current month
+    const today = new Date();
+    const currentMonth = `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}`;
+    monthInput.value = currentMonth;
+    fetchRanking(currentMonth);
   </script>
 </body>
 </html>
