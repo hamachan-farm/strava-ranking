@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Strava月間ランキング</title>
+</head>
+<body>
+
+<h1>Strava月間ランキング</h1>
+
+<label for="monthInput">月を選択 (例: 2025-07)</label>
+<input type="month" id="monthInput" value="2025-07" />
+<button id="loadBtn">読み込み</button>
+
+<div id="error" style="color:red;"></div>
+
+<table id="rankingTable" border="1" style="border-collapse: collapse; margin-top: 10px; display:none;">
+  <thead>
+    <tr><th>順位</th><th>ユーザー名</th><th>距離(km)</th><th>時間(分)</th><th>回数</th></tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<script>
+  const apiBaseUrl = 'https://script.google.com/macros/s/AKfycbxGwnsYZiMtzUcB1Mk6odPNAgLaZPVr9K4WaHs0EYgqy3emiBimIg1wZPk_Ucobjb3iSg/exec';
+
+  document.getElementById('loadBtn').addEventListener('click', () => {
+    const month = document.getElementById('monthInput').value;
+    if (!month) {
+      showError('月を選択してください');
+      return;
+    }
+    fetchRanking(month);
+  });
+
+  function showError(msg) {
+    document.getElementById('error').textContent = msg;
+    document.getElementById('rankingTable').style.display = 'none';
+  }
+
+  async function fetchRanking(month) {
+    showError('');
+    const url = `${apiBaseUrl}?month=${month}`;
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('通信エラー');
+      const data = await res.json();
+      if (data.error) {
+        showError(data.error);
+        return;
+      }
+      renderTable(data.ranking);
+    } catch (e) {
+      showError('データ取得失敗: ' + e.message);
+    }
+  }
+
+  function renderTable(ranking) {
+    const tbody = document.querySelector('#rankingTable tbody');
+    tbody.innerHTML = '';
+    ranking.forEach(row => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${row.rank}</td>
+        <td>${row.user}</td>
+        <td>${row.distance_km}</td>
+        <td>${row.time_min}</td>
+        <td>${row.count}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+    document.getElementById('rankingTable').style.display = 'table';
+  }
+
+  // 最初の表示で自動読み込み
+  fetchRanking(document.getElementById('monthInput').value);
+</script>
+
+</body>
+</html>
