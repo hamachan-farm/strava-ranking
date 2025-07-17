@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Strava 月間ランキング</title>
+</head>
+<body>
+  <h2>Strava 月間ランキング</h2>
+
+  <input type="month" id="monthInput" />
+  <button onclick="loadRanking()">読み込む</button>
+
+  <div id="result"></div>
+
+  <script>
+    const apiUrl = 'https://script.google.com/macros/s/https://script.google.com/macros/s/AKfycbxGwnsYZiMtzUcB1Mk6odPNAgLaZPVr9K4WaHs0EYgqy3emiBimIg1wZPk_Ucobjb3iSg/exec/exec';
+
+    async function loadRanking() {
+      const month = document.getElementById('monthInput').value;
+      if (!month) {
+        alert('まず月を選んでください');
+        return;
+      }
+      document.getElementById('result').textContent = '読み込み中…';
+
+      try {
+        const res = await fetch(`${apiUrl}?month=${month}`);
+        const data = await res.json();
+
+        if (!Array.isArray(data) || data.length === 0) {
+          document.getElementById('result').textContent = 'データがありません';
+          return;
+        }
+
+        let html = '<table border="1" cellpadding="5"><tr><th>順位</th><th>ユーザー名</th><th>距離(km)</th><th>時間(分)</th><th>回数</th></tr>';
+        data.forEach(row => {
+          html += `<tr>
+            <td>${row.rank}</td>
+            <td>${row.user}</td>
+            <td>${row.distance}</td>
+            <td>${row.time}</td>
+            <td>${row.count}</td>
+          </tr>`;
+        });
+        html += '</table>';
+        document.getElementById('result').innerHTML = html;
+
+      } catch (e) {
+        document.getElementById('result').textContent = '読み込み失敗しました';
+      }
+    }
+  </script>
+</body>
+</html>
